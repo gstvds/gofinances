@@ -1,9 +1,14 @@
 import React from 'react';
+import { ThemeProvider } from 'styled-components';
+
+import theme from './global/styles/theme';
 
 import { Dashboard } from './pages/Dashboard';
 
 export function App() {
   return (
-    <Dashboard />
+    <ThemeProvider theme={theme}>
+      <Dashboard />
+    </ThemeProvider>
   );
 }
