@@ -3,22 +3,30 @@ import React from 'react';
 import { Container, Header, Title, Icon, Footer, Amount, LastTransaction } from './styles';
 
 interface HighlightCardProps {
-  type: 'income' | 'outcome' | 'total';
+  title: string;
   amount: number;
+  lastTransaction: string;
+  type: 'income' | 'outcome' | 'total';
 }
 
-export function HighlightCard(){
+enum IconTypes {
+  income = 'arrow-up-circle',
+  outcome = 'arrow-down-circle',
+  total = 'dollar-sign'
+}
+
+export function HighlightCard({ title, amount, lastTransaction, type }: HighlightCardProps){
   return (
-    <Container>
+    <Container type={type}>
       <Header>
-        <Title>Entrada</Title>
-        <Icon name="arrow-up-circle" />
+        <Title type={type}>{title}</Title>
+        <Icon type={type} name={IconTypes[type]} />
       </Header>
       
       <Footer>
-        <Amount>R$ 17.400,00</Amount>
-        <LastTransaction>
-          Última entrada dia 13 de abril
+        <Amount type={type}>R$ {Intl.NumberFormat('pt-BR', { currency: 'BRL' }).format(amount)}</Amount>
+        <LastTransaction type={type}>
+          {lastTransaction}
         </LastTransaction>
       </Footer>
     </Container>
