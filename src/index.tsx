@@ -11,7 +11,8 @@ import {
 
 import theme from './global/styles/theme';
 
-import { Dashboard } from './pages/Dashboard';
+// import { Dashboard } from './pages/Dashboard';
+import { Register } from './pages/Register';
 
 export function App() {
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_500Medium, Poppins_700Bold });
@@ -22,7 +23,7 @@ export function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <Dashboard />
+      <Register />
     </ThemeProvider>
   );
 }
