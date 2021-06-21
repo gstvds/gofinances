@@ -13,6 +13,7 @@ import theme from './global/styles/theme';
 
 // import { Dashboard } from './pages/Dashboard';
 import { Register } from './pages/Register';
+// import { CategorySelect } from './pages/CategorySelect';
 
 export function App() {
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_500Medium, Poppins_700Bold });
