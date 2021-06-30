@@ -1,7 +1,7 @@
 import React from 'react';
-import type { TouchableOpacityProps } from 'react-native';
+import type { RectButtonProps } from 'react-native-gesture-handler';
 
-import { Container, Icon, Title } from './styles';
+import { Container, Button, Icon, Title } from './styles';
 
 enum ICONS {
   income = 'arrow-up-circle',
@@ -10,7 +10,7 @@ enum ICONS {
 
 export type TRANSACTION_TYPE = keyof typeof ICONS;
 
-interface TransactionTypeButtonProps extends TouchableOpacityProps {
+interface TransactionTypeButtonProps extends RectButtonProps {
   title: string;
   type: TRANSACTION_TYPE;
   selected: boolean;
@@ -18,11 +18,13 @@ interface TransactionTypeButtonProps extends TouchableOpacityProps {
 
 export function TransactionTypeButton({ title, type, selected, ...rest }: TransactionTypeButtonProps) {
   return (
-    <Container {...rest} type={type} selected={selected}>
-      <Icon type={type} name={ICONS[type]} />
-      <Title>
-        {title}
-      </Title>
+    <Container type={type} selected={selected}>
+      <Button {...rest}>
+        <Icon type={type} name={ICONS[type]} />
+        <Title>
+          {title}
+        </Title>
+      </Button>
     </Container>
   )
 }
