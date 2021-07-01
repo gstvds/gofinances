@@ -30,13 +30,21 @@ export interface TransactionListProps extends TransactionCardProps {
 export function Dashboard() {
   const [data, setData] = useState<TransactionListProps[]>([]);
 
-  useEffect(() => {
-    async function loadData() {
-      const currentData = await AsyncStorage.getItem(STORAGE_KEYS.transactions);
-      if (currentData) setData(JSON.parse(currentData));
-    }
+  async function loadTransactions() {
+    const response = await AsyncStorage.getItem(STORAGE_KEYS.transactions);
+    const parsedTransactions = response ? JSON.parse(response) : [];
 
-    loadData();
+    const transactions: TransactionListProps[] = parsedTransactions.map((item: TransactionListProps) => {
+      const amount = Number(item.amount);
+      console.log(item);
+      const date = Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' }).format(new Date(item.date));
+      return { id: item.id, name: item.name, amount, type: item.type, category: item.category, date };
+    });
+    setData(transactions);
+  }
+
+  useEffect(() => {
+    loadTransactions();
   }, []);
 
   return (

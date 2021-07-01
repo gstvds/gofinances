@@ -8,7 +8,7 @@ interface TypeProps {
 }
 
 export const Container = styled.View<TypeProps>`
-  background-color: ${(props) => props.type === 'total' ? props.theme.colors.attention : props.theme.colors.shape};
+  background-color: ${(props) => props.type === 'total' ? props.theme.colors.secondary : props.theme.colors.shape};
 
   width: ${RFValue(300)}px;
   border-radius: 5px;
