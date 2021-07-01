@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
   Container,
@@ -20,48 +21,24 @@ import {
 import { HighlightCard } from '../../components/HighlightCard';
 import { TransactionCard } from '../../components/TransactionCard';
 import type { TransactionCardProps } from '../../components/TransactionCard';
+import { STORAGE_KEYS } from '../../utils/types';
 
 export interface TransactionListProps extends TransactionCardProps {
   id: string;
 }
 
-const data: TransactionListProps[] = [
-  {
-    id: '1',
-    title: 'Desenvolvimento de site',
-    amount: 12000.4123123,
-    category: {
-      name: 'Vendas',
-      icon: 'dollar-sign',
-    },
-    type: 'income' as const,
-    date: '13/04/2020',
-  },
-  {
-    id: '2',
-    title: 'Hamburgueria Pizzy',
-    amount: 59,
-    category: {
-      name: 'Alimentação',
-      icon: 'coffee',
-    },
-    type: 'outcome' as const,
-    date: '10/04/2020',
-  },
-  {
-    id: '3',
-    title: 'Aluguel do apartamento',
-    amount: 1200,
-    category: {
-      name: 'Casa',
-      icon: 'home',
-    },
-    type: 'outcome' as const,
-    date: '27/03/2020',
-  },
-];
-
 export function Dashboard() {
+  const [data, setData] = useState<TransactionListProps[]>([]);
+
+  useEffect(() => {
+    async function loadData() {
+      const currentData = await AsyncStorage.getItem(STORAGE_KEYS.transactions);
+      if (currentData) setData(JSON.parse(currentData));
+    }
+
+    loadData();
+  }, []);
+
   return (
     <Container>
       <Header>

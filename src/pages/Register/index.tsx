@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 import { Alert, Keyboard, Modal, TouchableWithoutFeedback } from 'react-native';
-import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import uuid from 'react-native-uuid'
+
+import { useForm } from 'react-hook-form';
+import { useNavigation } from '@react-navigation/native';
 
 import type { TRANSACTION_TYPE } from '../../components/Form/TransactionTypeButton';
+import { STORAGE_KEYS } from '../../utils/types';
 
 import { Container, Header, Title, Form, Fields, TransactionTypes } from './styles';
 
@@ -26,7 +31,8 @@ const registerFormSchema = yup.object().shape({
 });
 
 export function Register() {
-  const { control, handleSubmit, formState } = useForm({
+  const navigation = useNavigation();
+  const { control, handleSubmit, formState, reset } = useForm({
     resolver: yupResolver(registerFormSchema),
   });
   const { errors } = formState;
@@ -49,21 +55,36 @@ export function Register() {
     setCategoryModalOpen(false);
   }
 
-  function handleRegister(form: RegisterFormData) {
+  async function handleRegister(form: RegisterFormData) {
     if (!transactionType)
       return Alert.alert('Selecione o tipo da transação');
 
     if (category.key === 'category')
       return Alert.alert('Selecione a categoria');
 
-    const data = {
+    const newTransaction = {
+      id: String(uuid.v4()),
       name: form.name,
       amount: form.amount,
       transactionType,
       category: category.key,
+      data: new Date(),
     };
 
-    console.log(data);
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEYS.transactions);
+      const currentData = data ? JSON.parse(data) : [];
+
+      await AsyncStorage.setItem(STORAGE_KEYS.transactions, JSON.stringify([...currentData, newTransaction]));
+
+      reset();
+      setCategory({ key: 'category', name: 'Categoria' });
+
+      navigation.navigate('Listagem');
+    } catch (error) {
+      console.log(error);
+      Alert.alert('Não foi possível salvar');
+    }
   }
 
   return (
@@ -81,7 +102,7 @@ export function Register() {
               name="name"
               placeholder="Nome"
               autoCapitalize="sentences"
-              />
+            />
             <InputForm
               control={control}
               error={errors.amount?.message}
