@@ -1,5 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+
+import type { TransactionCardProps } from '../../components/TransactionCard';
+
+import { STORAGE_KEYS } from '../../utils/types';
 
 import {
   Container,
@@ -20,8 +25,6 @@ import {
 
 import { HighlightCard } from '../../components/HighlightCard';
 import { TransactionCard } from '../../components/TransactionCard';
-import type { TransactionCardProps } from '../../components/TransactionCard';
-import { STORAGE_KEYS } from '../../utils/types';
 
 export interface TransactionListProps extends TransactionCardProps {
   id: string;
@@ -43,9 +46,9 @@ export function Dashboard() {
     setData(transactions);
   }
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     loadTransactions();
-  }, []);
+  }, []));
 
   return (
     <Container>
