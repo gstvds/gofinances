@@ -1,10 +1,12 @@
 import React, { useState, useCallback } from 'react';
+import { ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 
 import type { TransactionCardProps } from '../../components/TransactionCard';
 
 import { STORAGE_KEYS } from '../../utils/types';
+import theme from '../../global/styles/theme';
 
 import {
   Container,
@@ -20,7 +22,8 @@ import {
   HighlightCards,
   Transactions,
   Title,
-  TransactionList
+  TransactionList,
+  LoadContainer,
 } from './styles';
 
 import { HighlightCard } from '../../components/HighlightCard';
@@ -40,6 +43,7 @@ interface HighlightData {
 }
 
 export function Dashboard() {
+  const [loading, setLoading] = useState(true);
   const [transactions, setTransactions] = useState<TransactionListProps[]>([]);
   const [highlight, setHighlight] = useState<HighlightData>({ entries: { total: 0 }, expenses: { total: 0 } });
 
@@ -60,6 +64,7 @@ export function Dashboard() {
     });
     setTransactions(mappedTransactions);
     setHighlight({ entries, expenses })
+    setLoading(false);
   }
 
   useFocusEffect(useCallback(() => {
@@ -68,37 +73,45 @@ export function Dashboard() {
 
   return (
     <Container>
-      <Header>
-        <UserContainer>
-          <UserInfo>
-            <Photo source={{ uri: 'https://github.com/gstvds.png' }} />
-            <User>
-              <UserGreeting>Olá,</UserGreeting>
-              <UserName>Gustavo</UserName>
-            </User>
-          </UserInfo>
-          <LogoutButton onPress={() => null}>
-            <Icon name="power" />
-          </LogoutButton>
-        </UserContainer>
-      </Header>
-      <HighlightCards>
-        <HighlightCard type='income' title="Entradas" amount={highlight.entries.total} lastTransaction="Última entrada dia 13 de abril" />
-        <HighlightCard type='outcome' title="Saídas" amount={highlight.expenses.total} lastTransaction="Última saída dia 03 de abril" />
-        <HighlightCard type='total' title="Total" amount={highlight.entries.total - highlight.expenses.total} lastTransaction="01 à 16 de abril" />
-      </HighlightCards>
+      {loading ? (
+        <LoadContainer>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </LoadContainer>
+      ) : (
+        <>
+          <Header>
+            <UserContainer>
+              <UserInfo>
+                <Photo source={{ uri: 'https://github.com/gstvds.png' }} />
+                <User>
+                  <UserGreeting>Olá,</UserGreeting>
+                  <UserName>Gustavo</UserName>
+                </User>
+              </UserInfo>
+              <LogoutButton onPress={() => null}>
+                <Icon name="power" />
+              </LogoutButton>
+            </UserContainer>
+          </Header>
+          <HighlightCards>
+            <HighlightCard type='income' title="Entradas" amount={highlight.entries.total} lastTransaction="Última entrada dia 13 de abril" />
+            <HighlightCard type='outcome' title="Saídas" amount={highlight.expenses.total} lastTransaction="Última saída dia 03 de abril" />
+            <HighlightCard type='total' title="Total" amount={highlight.entries.total - highlight.expenses.total} lastTransaction="01 à 16 de abril" />
+          </HighlightCards>
 
-      <Transactions>
-        <Title>Listagem</Title>
+          <Transactions>
+            <Title>Listagem</Title>
 
-        <TransactionList
-          data={transactions}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => (
-            <TransactionCard {...item} />
-          )}
-        />
-      </Transactions>
+            <TransactionList
+              data={transactions}
+              keyExtractor={item => item.id}
+              renderItem={({ item }) => (
+                <TransactionCard {...item} />
+              )}
+            />
+          </Transactions>
+        </>
+      )}
     </Container>
   );
 }
