@@ -35,6 +35,7 @@ export interface TransactionListProps extends TransactionCardProps {
 
 interface HighlightProps {
   total: number;
+  lastTransaction: string;
 }
 
 interface HighlightData {
@@ -45,14 +46,23 @@ interface HighlightData {
 export function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [transactions, setTransactions] = useState<TransactionListProps[]>([]);
-  const [highlight, setHighlight] = useState<HighlightData>({ entries: { total: 0 }, expenses: { total: 0 } });
+  const [highlight, setHighlight] = useState<HighlightData>({ entries: { total: 0, lastTransaction: '' }, expenses: { total: 0, lastTransaction: '' } });
+
+  function getLastTransactionDate(collection: TransactionListProps[], type: 'outcome' | 'income') {
+    const lastDate = new Date(Math.max.apply(Math, collection
+      .filter((transaction) => transaction.type === type)
+      .map((transaction) => new Date(transaction.date).getTime())));
+    const parsedLastDate = Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'long' }).format(new Date(lastDate));
+
+    return parsedLastDate;
+  }
 
   async function loadTransactions() {
     const response = await AsyncStorage.getItem(STORAGE_KEYS.transactions);
-    const parsedTransactions = response ? JSON.parse(response) : [];
+    const parsedTransactions: TransactionListProps[] = response ? JSON.parse(response) : [];
 
-    let entries = { total: 0 };
-    let expenses = { total: 0 };
+    let entries = { total: 0, lastTransaction: '' };
+    let expenses = { total: 0, lastTransaction: '' };
 
     const mappedTransactions: TransactionListProps[] = parsedTransactions.map((item: TransactionListProps) => {
       if (item.type === 'income') entries.total += Number(item.amount);
@@ -63,6 +73,10 @@ export function Dashboard() {
       return { id: item.id, name: item.name, amount, type: item.type, category: item.category, date, entries, expenses };
     });
     setTransactions(mappedTransactions);
+
+    entries.lastTransaction = getLastTransactionDate(parsedTransactions, 'income');
+    expenses.lastTransaction = getLastTransactionDate(parsedTransactions, 'outcome');
+
     setHighlight({ entries, expenses })
     setLoading(false);
   }
@@ -94,8 +108,8 @@ export function Dashboard() {
             </UserContainer>
           </Header>
           <HighlightCards>
-            <HighlightCard type='income' title="Entradas" amount={highlight.entries.total} lastTransaction="Última entrada dia 13 de abril" />
-            <HighlightCard type='outcome' title="Saídas" amount={highlight.expenses.total} lastTransaction="Última saída dia 03 de abril" />
+            <HighlightCard type='income' title="Entradas" amount={highlight.entries.total} lastTransaction={`Última entrada dia ${highlight.entries.lastTransaction}`} />
+            <HighlightCard type='outcome' title="Saídas" amount={highlight.expenses.total} lastTransaction={`Última saída dia ${highlight.expenses.lastTransaction}`} />
             <HighlightCard type='total' title="Total" amount={highlight.entries.total - highlight.expenses.total} lastTransaction="01 à 16 de abril" />
           </HighlightCards>
 
