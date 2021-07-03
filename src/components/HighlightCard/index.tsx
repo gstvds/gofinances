@@ -24,7 +24,7 @@ export function HighlightCard({ title, amount, lastTransaction, type }: Highligh
       </Header>
       
       <Footer>
-        <Amount type={type}>R$ {Intl.NumberFormat('pt-BR', { currency: 'BRL' }).format(amount)}</Amount>
+        <Amount type={type}>{Intl.NumberFormat('pt-BR', { currency: 'BRL', style: 'currency' }).format(amount)}</Amount>
         <LastTransaction type={type}>
           {lastTransaction}
         </LastTransaction>

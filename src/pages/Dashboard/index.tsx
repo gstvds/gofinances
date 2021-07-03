@@ -30,20 +30,36 @@ export interface TransactionListProps extends TransactionCardProps {
   id: string;
 }
 
+interface HighlightProps {
+  total: number;
+}
+
+interface HighlightData {
+  entries: HighlightProps;
+  expenses: HighlightProps;
+}
+
 export function Dashboard() {
-  const [data, setData] = useState<TransactionListProps[]>([]);
+  const [transactions, setTransactions] = useState<TransactionListProps[]>([]);
+  const [highlight, setHighlight] = useState<HighlightData>({ entries: { total: 0 }, expenses: { total: 0 } });
 
   async function loadTransactions() {
     const response = await AsyncStorage.getItem(STORAGE_KEYS.transactions);
     const parsedTransactions = response ? JSON.parse(response) : [];
 
-    const transactions: TransactionListProps[] = parsedTransactions.map((item: TransactionListProps) => {
+    let entries = { total: 0 };
+    let expenses = { total: 0 };
+
+    const mappedTransactions: TransactionListProps[] = parsedTransactions.map((item: TransactionListProps) => {
+      if (item.type === 'income') entries.total += Number(item.amount);
+      else if (item.type === 'outcome') expenses.total += Number(item.amount);
+
       const amount = Number(item.amount);
-      console.log(item);
       const date = Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' }).format(new Date(item.date));
-      return { id: item.id, name: item.name, amount, type: item.type, category: item.category, date };
+      return { id: item.id, name: item.name, amount, type: item.type, category: item.category, date, entries, expenses };
     });
-    setData(transactions);
+    setTransactions(mappedTransactions);
+    setHighlight({ entries, expenses })
   }
 
   useFocusEffect(useCallback(() => {
@@ -67,16 +83,16 @@ export function Dashboard() {
         </UserContainer>
       </Header>
       <HighlightCards>
-        <HighlightCard type='income' title="Entradas" amount={17400} lastTransaction="Última entrada dia 13 de abril" />
-        <HighlightCard type='outcome' title="Saídas" amount={1259} lastTransaction="Última saída dia 03 de abril" />
-        <HighlightCard type='total' title="Total" amount={16141} lastTransaction="01 à 16 de abril" />
+        <HighlightCard type='income' title="Entradas" amount={highlight.entries.total} lastTransaction="Última entrada dia 13 de abril" />
+        <HighlightCard type='outcome' title="Saídas" amount={highlight.expenses.total} lastTransaction="Última saída dia 03 de abril" />
+        <HighlightCard type='total' title="Total" amount={highlight.entries.total - highlight.expenses.total} lastTransaction="01 à 16 de abril" />
       </HighlightCards>
 
       <Transactions>
         <Title>Listagem</Title>
 
         <TransactionList
-          data={data}
+          data={transactions}
           keyExtractor={item => item.id}
           renderItem={({ item }) => (
             <TransactionCard {...item} />
