@@ -2,11 +2,11 @@ import React, { useState, useCallback } from 'react';
 import { ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
+import { useTheme } from 'styled-components';
 
 import type { TransactionCardProps } from '../../components/TransactionCard';
 
 import { STORAGE_KEYS } from '../../utils/types';
-import theme from '../../global/styles/theme';
 
 import {
   Container,
@@ -47,6 +47,7 @@ export function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [transactions, setTransactions] = useState<TransactionListProps[]>([]);
   const [highlight, setHighlight] = useState<HighlightData>({ entries: { total: 0, lastTransaction: '' }, expenses: { total: 0, lastTransaction: '' } });
+  const theme = useTheme();
 
   function getLastTransactionDate(collection: TransactionListProps[], type: 'outcome' | 'income') {
     const lastDate = new Date(Math.max.apply(Math, collection
