@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { createContext, useContext } from 'react';
 
 import * as Google from 'expo-google-app-auth';
+import AppleAuthentication from 'expo-apple-authentication';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import type { ReactNode } from 'react';
@@ -17,6 +18,7 @@ interface User {
 interface AuthContextData {
   user: User;
   signInWithGoogle: () => Promise<void>;
+  signInWithApple: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -52,8 +54,33 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
+  async function signInWithApple() {
+    try {
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+        ]
+      });
+
+      if (credential) {
+        const userLogged = {
+          id: String(credential.user),
+          email: credential.email!,
+          name: credential.fullName!.givenName!,
+          photo: undefined,
+        };
+
+        setUser(userLogged);
+        await AsyncStorage.setItem(STORAGE_KEYS.user, JSON.stringify(userLogged));
+      }
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+
   return (
-    <AuthContext.Provider value={{ user, signInWithGoogle }}>
+    <AuthContext.Provider value={{ user, signInWithGoogle, signInWithApple }}>
       {children}
     </AuthContext.Provider>
   )
