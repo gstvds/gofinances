@@ -62,27 +62,32 @@ export function Dashboard() {
   }
 
   async function loadTransactions() {
-    const response = await AsyncStorage.getItem(STORAGE_KEYS.transactions);
-    const parsedTransactions: TransactionListProps[] = response ? JSON.parse(response) : [];
-
-    let entries = { total: 0, lastTransaction: '' };
-    let expenses = { total: 0, lastTransaction: '' };
-
-    const mappedTransactions: TransactionListProps[] = parsedTransactions.map((item: TransactionListProps) => {
-      if (item.type === 'income') entries.total += Number(item.amount);
-      else if (item.type === 'outcome') expenses.total += Number(item.amount);
-
-      const amount = Number(item.amount);
-      const date = Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' }).format(new Date(item.date));
-      return { id: item.id, name: item.name, amount, type: item.type, category: item.category, date, entries, expenses };
-    });
-    setTransactions(mappedTransactions);
-
-    entries.lastTransaction = getLastTransactionDate(parsedTransactions, 'income');
-    expenses.lastTransaction = getLastTransactionDate(parsedTransactions, 'outcome');
-
-    setHighlight({ entries, expenses })
-    setLoading(false);
+    try {
+      const response = await AsyncStorage.getItem(`${STORAGE_KEYS.transactions}${user.id}`);
+      const parsedTransactions: TransactionListProps[] = response ? JSON.parse(response) : [];
+  
+      let entries = { total: 0, lastTransaction: '' };
+      let expenses = { total: 0, lastTransaction: '' };
+  
+      const mappedTransactions: TransactionListProps[] = parsedTransactions.map((item: TransactionListProps) => {
+        if (item.type === 'income') entries.total += Number(item.amount);
+        else if (item.type === 'outcome') expenses.total += Number(item.amount);
+  
+        const amount = Number(item.amount);
+        const date = Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' }).format(new Date(item.date));
+        return { id: item.id, name: item.name, amount, type: item.type, category: item.category, date, entries, expenses };
+      });
+      setTransactions(mappedTransactions);
+  
+      entries.lastTransaction = getLastTransactionDate(parsedTransactions, 'income');
+      expenses.lastTransaction = getLastTransactionDate(parsedTransactions, 'outcome');
+  
+      setHighlight({ entries, expenses });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useFocusEffect(useCallback(() => {

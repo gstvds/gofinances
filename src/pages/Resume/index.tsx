@@ -9,6 +9,7 @@ import { useFocusEffect } from '@react-navigation/native';
 
 import { useTheme } from 'styled-components';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { useAuth } from '../../hooks/auth';
 
 import { STORAGE_KEYS } from '../../utils/types';
 import { categories } from '../../utils/categories';
@@ -50,6 +51,7 @@ export function Resume() {
   const [totalByCategories, setTotalByCategories] = useState<CategoryData[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const theme = useTheme();
+  const { user } = useAuth();
 
   function handleDateChange(action: 'previous' | 'next') {
     const newDate = action === 'previous' ? subMonths(selectedDate, 1) : addMonths(selectedDate, 1);
@@ -58,41 +60,46 @@ export function Resume() {
 
   async function loadData() {
     setLoading(true);
-    const response = await AsyncStorage.getItem(STORAGE_KEYS.transactions);
-    const parsedResponse: Transaction[] = response ? JSON.parse(response) : [];
-
-    const expenses = parsedResponse.filter((expense) =>
-      expense.type === 'outcome' &&
-      new Date(expense.date).getMonth() === selectedDate.getMonth() &&
-      new Date(expense.date).getFullYear() === selectedDate.getFullYear()
-    );
-    const expensesTotal = expenses.reduce((accumulator: number, expense: Transaction) => {
-      return accumulator + expense.amount;
-    }, 0);
-
-    const totalByCategory: CategoryData[] = [];
-
-    categories.forEach((category) => {
-      let total = 0;
-
-      expenses.forEach((expense) => {
-        if (expense.category === category.key) total += expense.amount;
-      });
-
-      if (total > 0) {
-        const percentage = (total / expensesTotal);
-        totalByCategory.push({
-          name: category.name,
-          color: category.color,
-          key: category.key,
-          total,
-          percentage,
-          percentageFormatted: Intl.NumberFormat('pt-BR', { style: 'percent' }).format(percentage),
+    try {
+      const response = await AsyncStorage.getItem(`${STORAGE_KEYS.transactions}${user.id}`);
+      const parsedResponse: Transaction[] = response ? JSON.parse(response) : [];
+  
+      const expenses = parsedResponse.filter((expense) =>
+        expense.type === 'outcome' &&
+        new Date(expense.date).getMonth() === selectedDate.getMonth() &&
+        new Date(expense.date).getFullYear() === selectedDate.getFullYear()
+      );
+      const expensesTotal = expenses.reduce((accumulator: number, expense: Transaction) => {
+        return accumulator + expense.amount;
+      }, 0);
+  
+      const totalByCategory: CategoryData[] = [];
+  
+      categories.forEach((category) => {
+        let total = 0;
+  
+        expenses.forEach((expense) => {
+          if (expense.category === category.key) total += expense.amount;
         });
-      }
-    });
-    setTotalByCategories(totalByCategory);
-    setLoading(false);
+  
+        if (total > 0) {
+          const percentage = (total / expensesTotal);
+          totalByCategory.push({
+            name: category.name,
+            color: category.color,
+            key: category.key,
+            total,
+            percentage,
+            percentageFormatted: Intl.NumberFormat('pt-BR', { style: 'percent' }).format(percentage),
+          });
+        }
+      });
+      setTotalByCategories(totalByCategory);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useFocusEffect(useCallback(() => {

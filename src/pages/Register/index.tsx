@@ -7,6 +7,7 @@ import uuid from 'react-native-uuid'
 
 import { useForm } from 'react-hook-form';
 import { useNavigation } from '@react-navigation/native';
+import { useAuth } from '../../hooks/auth';
 
 import type { TRANSACTION_TYPE } from '../../components/Form/TransactionTypeButton';
 import { STORAGE_KEYS } from '../../utils/types';
@@ -42,6 +43,7 @@ export function Register() {
   });
   const [transactionType, setTransactionType] = useState<TRANSACTION_TYPE>('income');
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
+  const { user } = useAuth();
 
   function handleTransactionType(type: TRANSACTION_TYPE) {
     setTransactionType(type);
@@ -72,10 +74,10 @@ export function Register() {
     };
 
     try {
-      const data = await AsyncStorage.getItem(STORAGE_KEYS.transactions);
+      const data = await AsyncStorage.getItem(`${STORAGE_KEYS.transactions}${user.id}`);
       const currentData = data ? JSON.parse(data) : [];
 
-      await AsyncStorage.setItem(STORAGE_KEYS.transactions, JSON.stringify([...currentData, newTransaction]));
+      await AsyncStorage.setItem(`${STORAGE_KEYS.transactions}${user.id}`, JSON.stringify([...currentData, newTransaction]));
 
       reset();
       setCategory({ key: 'category', name: 'Categoria' });
