@@ -17,6 +17,8 @@ import {
 
 import theme from './global/styles/theme';
 
+import { AuthProvider } from './hooks/auth';
+
 import { SignIn } from './pages/SignIn';
 import { AppRoute } from './routes/app.routes';
 
@@ -31,7 +33,9 @@ export function App() {
     <ThemeProvider theme={theme}>
       <NavigationContainer>
         <StatusBar barStyle="light-content" />
-        <SignIn />
+        <AuthProvider>
+          <SignIn />
+        </AuthProvider>
       </NavigationContainer>
     </ThemeProvider>
   );
