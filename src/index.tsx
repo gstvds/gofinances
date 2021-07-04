@@ -17,14 +17,15 @@ import {
 
 import theme from './global/styles/theme';
 
-import { AuthProvider } from './hooks/auth';
+import { AuthProvider, useAuth } from './hooks/auth';
 
 import { Routes } from './routes';
 
 export function App() {
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_500Medium, Poppins_700Bold });
+  const { loading } = useAuth();
 
-  if (!fontsLoaded) {
+  if (!fontsLoaded || loading) {
     return <AppLoading />
   }
 

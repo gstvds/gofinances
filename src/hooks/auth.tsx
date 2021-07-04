@@ -19,6 +19,8 @@ interface AuthContextData {
   user: User;
   signInWithGoogle: () => Promise<void>;
   signInWithApple: () => Promise<void>;
+  signOut: () => Promise<void>;
+  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -43,7 +45,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         const userLogged = {
           id: String(result.user.id),
           email: result.user.email!,
-          name: result.user.name!,
+          name: result.user.givenName!,
           photo: result.user.photoUrl!,
         }
 
@@ -69,7 +71,7 @@ function AuthProvider({ children }: AuthProviderProps) {
           id: String(credential.user),
           email: credential.email!,
           name: credential.fullName!.givenName!,
-          photo: undefined,
+          photo: `https://ui-avatars.com/api/?name=${credential.fullName!.givenName}?length="1"`,
         };
 
         setUser(userLogged);
@@ -78,6 +80,11 @@ function AuthProvider({ children }: AuthProviderProps) {
     } catch (error) {
       throw new Error(error);
     }
+  }
+
+  async function signOut() {
+    setUser({} as User);
+    await AsyncStorage.removeItem(STORAGE_KEYS.user);
   }
 
   useEffect(() => {
@@ -94,7 +101,7 @@ function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, signInWithGoogle, signInWithApple }}>
+    <AuthContext.Provider value={{ user, signInWithGoogle, signInWithApple, signOut, loading }}>
       {children}
     </AuthContext.Provider>
   )

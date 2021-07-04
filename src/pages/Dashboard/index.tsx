@@ -1,8 +1,10 @@
 import React, { useState, useCallback } from 'react';
 import { ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from 'styled-components';
+import { useAuth } from '../../hooks/auth';
 
 import type { TransactionCardProps } from '../../components/TransactionCard';
 
@@ -48,6 +50,7 @@ export function Dashboard() {
   const [transactions, setTransactions] = useState<TransactionListProps[]>([]);
   const [highlight, setHighlight] = useState<HighlightData>({ entries: { total: 0, lastTransaction: '' }, expenses: { total: 0, lastTransaction: '' } });
   const theme = useTheme();
+  const { signOut, user } = useAuth();
 
   function getLastTransactionDate(collection: TransactionListProps[], type: 'outcome' | 'income') {
     const lastDate = new Date(Math.max.apply(Math, collection
@@ -97,13 +100,13 @@ export function Dashboard() {
           <Header>
             <UserContainer>
               <UserInfo>
-                <Photo source={{ uri: 'https://github.com/gstvds.png' }} />
+                <Photo source={{ uri: user.photo }} />
                 <User>
                   <UserGreeting>Olá,</UserGreeting>
-                  <UserName>Gustavo</UserName>
+                  <UserName>{user.name}</UserName>
                 </User>
               </UserInfo>
-              <LogoutButton onPress={() => null}>
+              <LogoutButton onPress={() => signOut()}>
                 <Icon name="power" />
               </LogoutButton>
             </UserContainer>
