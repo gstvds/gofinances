@@ -19,8 +19,7 @@ import theme from './global/styles/theme';
 
 import { AuthProvider } from './hooks/auth';
 
-import { SignIn } from './pages/SignIn';
-import { AppRoute } from './routes/app.routes';
+import { Routes } from './routes';
 
 export function App() {
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_500Medium, Poppins_700Bold });
@@ -31,12 +30,10 @@ export function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <NavigationContainer>
-        <StatusBar barStyle="light-content" />
-        <AuthProvider>
-          <SignIn />
-        </AuthProvider>
-      </NavigationContainer>
+      <StatusBar barStyle="light-content" />
+      <AuthProvider>
+        <Routes />
+      </AuthProvider>
     </ThemeProvider>
   );
 }

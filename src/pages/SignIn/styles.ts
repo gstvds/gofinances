@@ -30,7 +30,7 @@ export const Title = styled.Text`
 export const SignInTitle = styled.Text`
   font-family: ${(props) => props.theme.fonts.regular};
   color: ${(props) => props.theme.colors.shape};
-  font-size: ${RFValue(16)};
+  font-size: ${RFValue(16)}px;
 
   text-align: center;
   margin-top: 80px;

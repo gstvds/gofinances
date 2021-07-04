@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createContext, useContext } from 'react';
 
 import * as Google from 'expo-google-app-auth';
@@ -29,6 +29,7 @@ interface AuthProviderProps {
 
 function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User>({} as User);
+  const [loading, setLoading] = useState(true);
 
   async function signInWithGoogle() {
     try {
@@ -78,6 +79,19 @@ function AuthProvider({ children }: AuthProviderProps) {
       throw new Error(error);
     }
   }
+
+  useEffect(() => {
+    async function loadUserStorageDate(): Promise<void> {
+      const userLogged = await AsyncStorage.getItem(STORAGE_KEYS.user);
+      if (userLogged) {
+        setUser(JSON.parse(userLogged) as User);
+      }
+
+      setLoading(false);
+    }
+
+    loadUserStorageDate();
+  }, []);
 
   return (
     <AuthContext.Provider value={{ user, signInWithGoogle, signInWithApple }}>
