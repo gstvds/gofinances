@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { createContext, useContext } from 'react';
 
+import * as Google from 'expo-google-app-auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import type { ReactNode } from 'react';
+import { STORAGE_KEYS } from '../utils/types';
 
 interface User {
   id: string;
@@ -12,6 +16,7 @@ interface User {
 
 interface AuthContextData {
   user: User;
+  signInWithGoogle: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -21,10 +26,34 @@ interface AuthProviderProps {
 }
 
 function AuthProvider({ children }: AuthProviderProps) {
-  const user = { id: '123', name: 'Gustavo Silva', email: 'gustavo@email.com' };
+  const [user, setUser] = useState<User>({} as User);
+
+  async function signInWithGoogle() {
+    try {
+      const result = await Google.logInAsync({
+        iosClientId: '',
+        androidClientId: '',
+        scopes: ['profile', 'email']
+      });
+
+      if (result.type === 'success') {
+        const userLogged = {
+          id: String(result.user.id),
+          email: result.user.email!,
+          name: result.user.name!,
+          photo: result.user.photoUrl!,
+        }
+
+        setUser(userLogged);
+        await AsyncStorage.setItem(STORAGE_KEYS.user, JSON.stringify(userLogged));
+      }
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
 
   return (
-    <AuthContext.Provider value={{ user }}>
+    <AuthContext.Provider value={{ user, signInWithGoogle }}>
       {children}
     </AuthContext.Provider>
   )
