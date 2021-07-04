@@ -53,8 +53,11 @@ export function Dashboard() {
   const { signOut, user } = useAuth();
 
   function getLastTransactionDate(collection: TransactionListProps[], type: 'outcome' | 'income') {
-    const lastDate = new Date(Math.max.apply(Math, collection
-      .filter((transaction) => transaction.type === type)
+    const filteredCollection = collection.filter((transaction) => transaction.type === type);
+
+    if (filteredCollection.length === 0) return '0';
+
+    const lastDate = new Date(Math.max.apply(Math, filteredCollection
       .map((transaction) => new Date(transaction.date).getTime())));
     const parsedLastDate = Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'long' }).format(new Date(lastDate));
 
@@ -117,9 +120,24 @@ export function Dashboard() {
             </UserContainer>
           </Header>
           <HighlightCards>
-            <HighlightCard type='income' title="Entradas" amount={highlight.entries.total} lastTransaction={`Última entrada dia ${highlight.entries.lastTransaction}`} />
-            <HighlightCard type='outcome' title="Saídas" amount={highlight.expenses.total} lastTransaction={`Última saída dia ${highlight.expenses.lastTransaction}`} />
-            <HighlightCard type='total' title="Total" amount={highlight.entries.total - highlight.expenses.total} lastTransaction="01 à 16 de abril" />
+            <HighlightCard
+              type='income'
+              title="Entradas"
+              amount={highlight.entries.total}
+              lastTransaction={highlight.entries.lastTransaction === '0' ? 'Não há transações de entrada' : `Última entrada dia ${highlight.entries.lastTransaction}`}
+            />
+            <HighlightCard
+              type='outcome'
+              title="Saídas"
+              amount={highlight.expenses.total}
+              lastTransaction={highlight.expenses.lastTransaction === '0' ? 'Não há transações de saída' : `Última saída dia ${highlight.expenses.lastTransaction}`}
+            />
+            <HighlightCard
+              type='total'
+              title="Total"
+              amount={highlight.entries.total - highlight.expenses.total}
+              lastTransaction={highlight.expenses.lastTransaction === '0' ? '' : `01 a ${highlight.expenses.lastTransaction}`}
+            />
           </HighlightCards>
 
           <Transactions>
