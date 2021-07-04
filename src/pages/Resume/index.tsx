@@ -63,7 +63,7 @@ export function Resume() {
     try {
       const response = await AsyncStorage.getItem(`${STORAGE_KEYS.transactions}${user.id}`);
       const parsedResponse: Transaction[] = response ? JSON.parse(response) : [];
-  
+
       const expenses = parsedResponse.filter((expense) =>
         expense.type === 'outcome' &&
         new Date(expense.date).getMonth() === selectedDate.getMonth() &&
@@ -72,16 +72,16 @@ export function Resume() {
       const expensesTotal = expenses.reduce((accumulator: number, expense: Transaction) => {
         return accumulator + expense.amount;
       }, 0);
-  
+
       const totalByCategory: CategoryData[] = [];
-  
+
       categories.forEach((category) => {
         let total = 0;
-  
+
         expenses.forEach((expense) => {
           if (expense.category === category.key) total += expense.amount;
         });
-  
+
         if (total > 0) {
           const percentage = (total / expensesTotal);
           totalByCategory.push({

@@ -15,14 +15,14 @@ enum IconTypes {
   total = 'dollar-sign'
 }
 
-export function HighlightCard({ title, amount, lastTransaction, type }: HighlightCardProps){
+export function HighlightCard({ title, amount, lastTransaction, type }: HighlightCardProps) {
   return (
     <Container type={type}>
       <Header>
         <Title type={type}>{title}</Title>
         <Icon type={type} name={IconTypes[type]} />
       </Header>
-      
+
       <Footer>
         <Amount type={type}>{Intl.NumberFormat('pt-BR', { currency: 'BRL', style: 'currency' }).format(amount)}</Amount>
         <LastTransaction type={type}>

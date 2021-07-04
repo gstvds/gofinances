@@ -26,7 +26,7 @@ export interface TransactionCardProps {
 }
 
 export function TransactionCard({ name, amount, type, category, date }: TransactionCardProps) {
-  const [ findCategory ] = categories.filter((item) => item.key === category);
+  const [findCategory] = categories.filter((item) => item.key === category);
 
   return (
     <Container>
