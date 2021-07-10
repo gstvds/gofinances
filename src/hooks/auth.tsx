@@ -36,8 +36,8 @@ function AuthProvider({ children }: AuthProviderProps) {
   async function signInWithGoogle() {
     try {
       const result = await Google.logInAsync({
-        iosClientId: '',
-        androidClientId: '',
+        iosClientId: '1091279764896-0u5u5784s8t6rf3udesiq1uo55no96a8.apps.googleusercontent.com',
+        androidClientId: '1091279764896-2i3hb64j66b6jvhb436qmik18jsqat70.apps.googleusercontent.com',
         scopes: ['profile', 'email']
       });
 
