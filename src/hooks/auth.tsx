@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { createContext, useContext } from 'react';
 
-import * as Google from 'expo-google-app-auth';
+const { CLIENT_ID } = process.env;
+const { REDIRECT_URI } = process.env;
+
+import * as AuthSession from 'expo-auth-session';
 import AppleAuthentication from 'expo-apple-authentication';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -35,23 +38,24 @@ function AuthProvider({ children }: AuthProviderProps) {
 
   async function signInWithGoogle() {
     try {
-      const result = await Google.logInAsync({
-        iosClientId: '1091279764896-0u5u5784s8t6rf3udesiq1uo55no96a8.apps.googleusercontent.com',
-        androidClientId: '1091279764896-2i3hb64j66b6jvhb436qmik18jsqat70.apps.googleusercontent.com',
-        scopes: ['profile', 'email']
-      });
+      const RESPONSE_TYPE = 'token';
+      const SCOPE = encodeURI('profile email');
+
+      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=${SCOPE}`;
+      const result = await AuthSession.startAsync({ authUrl });
 
       if (result.type === 'success') {
-        const userLogged = {
-          id: String(result.user.id),
-          email: result.user.email!,
-          name: result.user.givenName!,
-          photo: result.user.photoUrl!,
-        }
+        const response = await fetch(`https://googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${result.params.access_token}`);
 
-        setUser(userLogged);
-        await AsyncStorage.setItem(STORAGE_KEYS.user, JSON.stringify(userLogged));
+        const userInfo = await response.json();
+        setUser({
+          id: userInfo.id,
+          email: userInfo.email,
+          name: userInfo.given_name,
+          photo: userInfo.picture,
+        });
       }
+
     } catch (error) {
       throw new Error(error);
     }
